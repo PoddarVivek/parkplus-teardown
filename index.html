@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Park+ Product Teardown — Vivek</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&display=swap');
+
+  :root {
+    --pp-blue: #0057FF;
+    --pp-blue-dark: #003DC2;
+    --pp-blue-light: #E8EFFF;
+    --pp-yellow: #FFD600;
+    --pp-yellow-light: #FFFBE6;
+    --pp-dark: #0A0F1E;
+    --pp-gray: #6B7280;
+    --pp-gray-light: #F4F6FA;
+    --pp-border: #E5E9F0;
+    --pp-red: #FF3B30;
+    --pp-green: #34C759;
+    --white: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #F4F6FA;
+    color: var(--pp-dark);
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--pp-border);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--pp-blue);
+    letter-spacing: -0.5px;
+  }
+  .nav-logo .plus {
+    background: var(--pp-yellow);
+    color: var(--pp-dark);
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 900;
+  }
+  .nav-badge {
+    background: var(--pp-blue-light);
+    color: var(--pp-blue);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+  .nav-meta {
+    font-size: 13px;
+    color: var(--pp-gray);
+  }
+  .nav-meta strong { color: var(--pp-dark); }
+
+  /* HERO */
+  .hero {
+    background: var(--pp-dark);
+    padding: 80px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,87,255,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 200px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,214,0,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,87,255,0.15);
+    border: 1px solid rgba(0,87,255,0.3);
+    color: #7AADFF;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 28px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 20px;
+  }
+  .hero h1 .highlight {
+    color: var(--pp-yellow);
+  }
+  .hero-sub {
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+    max-width: 600px;
+    margin-bottom: 48px;
+    font-weight: 400;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .hero-stat { }
+  .hero-stat .num {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -1px;
+  }
+  .hero-stat .num span { color: var(--pp-yellow); }
+  .hero-stat .label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  /* MAIN CONTENT */
+  .container { max-width: 900px; margin: 0 auto; padding: 60px 40px; }
+
+  /* SECTION LABELS */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .section-label .tag {
+    background: var(--pp-blue);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .section-label h2 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--pp-border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title .icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .icon-green { background: #E6FAF0; }
+  .icon-red { background: #FFF0F0; }
+  .icon-blue { background: var(--pp-blue-light); }
+  .icon-yellow { background: var(--pp-yellow-light); }
+
+  .card p { color: #444; font-size: 15px; line-height: 1.7; }
+  .card p + p { margin-top: 10px; }
+
+  /* PROBLEM CARD — special */
+  .problem-card {
+    background: #FFF8E1;
+    border: 2px solid var(--pp-yellow);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+  .problem-card .problem-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #B8860B;
+    margin-bottom: 12px;
+  }
+  .problem-card h3 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--pp-dark);
+    margin-bottom: 14px;
+    letter-spacing: -0.3px;
+  }
+  .problem-card p { color: #555; font-size: 15px; line-height: 1.7; }
+
+  /* MOCKUP SECTION */
+  .mockup-wrap {
+    background: var(--white);
+    border: 1px solid var(--pp-border);
+    border-radius: 16px;
+    padding: 40px;
+    margin-bottom: 20px;
+  }
+  .mockup-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .mockup-sub {
+    font-size: 14px;
+    color: var(--pp-gray);
+    margin-bottom: 36px;
+  }
+  .mockup-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    align-items: center;
+  }
+  .phone-frame {
+    background: var(--pp-dark);
+    border-radius: 32px;
+    padding: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    max-width: 220px;
+    margin: 0 auto;
+  }
+  .phone-screen {
+    background: var(--white);
+    border-radius: 22px;
+    overflow: hidden;
+    min-height: 380px;
+  }
+  .phone-notch {
+    background: var(--pp-dark);
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .phone-notch-pill {
+    background: #1a1a2e;
+    width: 60px; height: 10px;
+    border-radius: 10px;
+  }
+
+  /* BEFORE SCREEN */
+  .before-screen { padding: 12px; }
+  .before-header {
+    background: var(--pp-blue);
+    color: white;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .before-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .before-tile {
+    background: var(--pp-gray-light);
+    border-radius: 8px;
+    padding: 8px 6px;
+    text-align: center;
+    font-size: 9px;
+    color: var(--pp-gray);
+    font-weight: 500;
+  }
+  .before-tile .t-icon { font-size: 16px; margin-bottom: 4px; }
+  .before-banner {
+    background: var(--pp-yellow-light);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 9px;
+    color: #B8860B;
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .before-list { }
+  .before-item {
+    background: var(--pp-gray-light);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 9px;
+    color: var(--pp-gray);
+    margin-bottom: 4px;
+  }
+  .overwhelm-tag {
+    background: #FFE5E5;
+    color: var(--pp-red);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 10px;
+    text-align: center;
+    width: 100%;
+  }
+
+  /* AFTER SCREEN */
+  .after-screen { padding: 14px; }
+  .after-header {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .after-header .pp-logo-small {
+    background: var(--pp-blue);
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .after-header h4 {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--pp-dark);
+    line-height: 1.3;
+  }
+  .after-header p {
+    font-size: 9px;
+    color: var(--pp-gray);
+    margin-top: 4px;
+  }
+  .intent-options { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
+  .intent-opt {
+    border: 1.5px solid var(--pp-border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--pp-dark);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .intent-opt.selected {
+    border-color: var(--pp-blue);
+    background: var(--pp-blue-light);
+    color: var(--pp-blue);
+  }
+  .intent-opt .opt-icon { font-size: 14px; }
+  .after-cta {
+    background: var(--pp-blue);
+    color: white;
+    border-radius: 10px;
+    padding: 9px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .good-tag {
+    background: #E6FAF0;
+    color: var(--pp-green);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 10px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .arrow-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .arrow-col .arrow-line {
+    width: 2px;
+    height: 20px;
+    background: var(--pp-blue);
+    opacity: 0.3;
+  }
+  .arrow-col .arrow-icon {
+    font-size: 22px;
+    color: var(--pp-blue);
+  }
+  .arrow-col .arrow-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--pp-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  /* PRD SECTION */
+  .prd-wrap {
+    background: var(--white);
+    border: 1px solid var(--pp-border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .prd-header {
+    background: var(--pp-blue);
+    padding: 24px 32px;
+    color: white;
+  }
+  .prd-header h3 {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .prd-header p { font-size: 13px; opacity: 0.7; }
+  .prd-meta {
+    display: flex;
+    gap: 24px;
+    padding: 16px 32px;
+    background: var(--pp-gray-light);
+    border-bottom: 1px solid var(--pp-border);
+    flex-wrap: wrap;
+  }
+  .prd-meta-item { font-size: 13px; color: var(--pp-gray); }
+  .prd-meta-item strong { color: var(--pp-dark); }
+  .prd-body { padding: 32px; }
+  .prd-section { margin-bottom: 32px; }
+  .prd-section:last-child { margin-bottom: 0; }
+  .prd-section-title {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--pp-blue);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--pp-blue-light);
+  }
+  .prd-section p { font-size: 14px; color: #444; line-height: 1.7; margin-bottom: 10px; }
+  .prd-section p:last-child { margin-bottom: 0; }
+
+  .metric-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 4px;
+  }
+  .metric-box {
+    background: var(--pp-gray-light);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .metric-box .m-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--pp-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .metric-box .m-val {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--pp-blue);
+    letter-spacing: -0.5px;
+  }
+  .metric-box .m-sub {
+    font-size: 12px;
+    color: var(--pp-gray);
+    margin-top: 2px;
+  }
+
+  .user-story {
+    background: var(--pp-blue-light);
+    border-left: 3px solid var(--pp-blue);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: var(--pp-dark);
+    font-style: italic;
+  }
+
+  .ac-list { list-style: none; }
+  .ac-list li {
+    font-size: 14px;
+    color: #444;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--pp-border);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .ac-list li:last-child { border-bottom: none; }
+  .ac-list li::before {
+    content: '✓';
+    color: var(--pp-green);
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .risk-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .risk-box {
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .risk-box.risk { background: #FFF0F0; border: 1px solid #FFCDD2; }
+  .risk-box.mitigation { background: #E6FAF0; border: 1px solid #B2DFDB; }
+  .risk-box .r-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .risk-box.risk .r-label { color: var(--pp-red); }
+  .risk-box.mitigation .r-label { color: var(--pp-green); }
+  .risk-box p { font-size: 13px; color: #444; line-height: 1.5; }
+
+  .timeline-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .tl-item {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .tl-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40px;
+    flex-shrink: 0;
+  }
+  .tl-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--pp-blue);
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+  .tl-line {
+    width: 2px;
+    flex: 1;
+    background: var(--pp-border);
+    min-height: 30px;
+    margin: 4px 0;
+  }
+  .tl-content {
+    padding-bottom: 24px;
+    flex: 1;
+  }
+  .tl-content .tl-week {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--pp-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .tl-content .tl-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--pp-dark);
+    margin-bottom: 4px;
+  }
+  .tl-content p {
+    font-size: 13px;
+    color: var(--pp-gray);
+    line-height: 1.5;
+  }
+
+  /* GROWTH SECTION */
+  .growth-card {
+    background: linear-gradient(135deg, var(--pp-blue) 0%, var(--pp-blue-dark) 100%);
+    border-radius: 16px;
+    padding: 36px;
+    color: white;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .growth-card::after {
+    content: '→';
+    position: absolute;
+    right: 40px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 80px;
+    opacity: 0.08;
+    font-weight: 900;
+  }
+  .growth-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--pp-yellow);
+    margin-bottom: 12px;
+  }
+  .growth-card h3 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .growth-card p {
+    font-size: 15px;
+    opacity: 0.8;
+    line-height: 1.7;
+    max-width: 600px;
+  }
+  .growth-tag-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .growth-tag {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 20px;
+  }
+
+  /* ABOUT ME */
+  .about-card {
+    background: var(--pp-dark);
+    border-radius: 16px;
+    padding: 36px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .about-left h3 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .about-left p {
+    font-size: 14px;
+    opacity: 0.65;
+    line-height: 1.7;
+    max-width: 460px;
+  }
+  .about-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .about-skill {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    color: rgba(255,255,255,0.8);
+  }
+  .about-right {
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .about-avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pp-blue), var(--pp-yellow));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 8px;
+    margin-left: auto;
+  }
+  .about-right p { font-size: 13px; opacity: 0.5; }
+
+  /* FOOTER */
+  footer {
+    background: var(--white);
+    border-top: 1px solid var(--pp-border);
+    padding: 24px 40px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--pp-gray);
+  }
+  footer strong { color: var(--pp-blue); }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--pp-border);
+    margin: 48px 0;
+  }
+
+  /* PILL TAGS */
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pill {
+    background: var(--pp-gray-light);
+    border: 1px solid var(--pp-border);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: #444;
+  }
+  .pill.blue { background: var(--pp-blue-light); border-color: #C0D4FF; color: var(--pp-blue); }
+  .pill.yellow { background: var(--pp-yellow-light); border-color: #FFE680; color: #8B6914; }
+
+  @media (max-width: 700px) {
+    nav { padding: 0 20px; }
+    .hero { padding: 48px 20px; }
+    .container { padding: 40px 20px; }
+    .mockup-grid { grid-template-columns: 1fr; gap: 20px; }
+    .arrow-col { transform: rotate(90deg); }
+    .risk-row { grid-template-columns: 1fr; }
+    .prd-body { padding: 20px; }
+    .about-card { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="plus">+</div>
+    Park+
+  </div>
+  <div class="nav-badge">Product Teardown</div>
+  <div class="nav-meta">By <strong>Vivek</strong> · NIT Kurukshetra · 2026</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      PM Internship Application
+    </div>
+    <h1>Park+ has a <span class="highlight">first-impression</span> problem.<br>Here's how to fix it.</h1>
+    <p class="hero-sub">A product teardown by a first-time user — with a concrete proposal, PRD, and one growth idea.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="num">50M<span>+</span></div>
+        <div class="label">Users</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">6</div>
+        <div class="label">Core Features</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">1</div>
+        <div class="label">Entry Point</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num"><span>?</span></div>
+        <div class="label">Where does a new user even start?</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 1: WHAT PARK+ DOES WELL -->
+<div class="container">
+
+  <div class="section-label">
+    <div class="tag">01</div>
+    <h2>What Park+ does well</h2>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <div class="icon icon-green">🏗️</div>
+      Massive surface area, executed cleanly
+    </div>
+    <p>Park+ has pulled off something genuinely hard — FASTag, e-challans, insurance, loans, parking, and ANPR hardware, all under one roof. Each feature works. The FASTag recharge flow is fast, the challan check is accurate, and the B2B side (boom barriers, ANPR) is a category in itself. That breadth is a moat.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <div class="icon icon-blue">🔗</div>
+      Smart ecosystem play
+    </div>
+    <p>Embedding inside PhonePe (200M+ users) rather than just building standalone shows sharp product-market thinking. Park+ is positioning itself as infrastructure for vehicle owners — not just another app. The Sequoia/Matrix backing validates this at scale.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <div class="icon icon-yellow">📊</div>
+      Data flywheel is real
+    </div>
+    <p>100M+ FASTag transactions, 20M+ listed cars. That's a dataset that can power personalized offers, insurance pricing, and EV charging prediction. The data exists — the question is whether the product surface reflects it to users.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 2: THE PROBLEM -->
+  <div class="section-label">
+    <div class="tag">02</div>
+    <h2>The friction I found</h2>
+  </div>
+
+  <div class="problem-card">
+    <div class="problem-label">Core Problem Statement</div>
+    <h3>New users open the app and don't know what it's for — them.</h3>
+    <p>I opened Park+ as a fresh user and felt immediately overwhelmed. FASTag recharge. E-challan. Car insurance. Test drives. Personal loans. New cars. There's no entry point that says "here's what matters to you." Every feature competes for attention on the home screen simultaneously.</p>
+    <p style="margin-top: 12px;">This isn't a visual design problem. It's an <strong>intent problem</strong>. The app knows a lot about cars — but it doesn't know anything about <em>this user</em> yet. So it shows everything, hoping something sticks.</p>
+    <div class="pill-row">
+      <div class="pill">Cognitive overload</div>
+      <div class="pill">Low activation</div>
+      <div class="pill">Feature blindness</div>
+      <div class="pill">No personalization hook</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <div class="icon icon-red">📉</div>
+      Why this hurts the business
+    </div>
+    <p>A user who doesn't understand the app in the first 30 seconds is very likely to drop off. With 50M+ downloads, even a 5% improvement in day-1 activation rate is a significant number. More importantly — if Park+ doesn't know user intent at signup, it can't personalize push notifications, surface the right upsell, or route B2B vs B2C users correctly.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 3: THE FIX — MOCKUP -->
+  <div class="section-label">
+    <div class="tag">03</div>
+    <h2>The proposed fix</h2>
+  </div>
+
+  <div class="mockup-wrap">
+    <div class="mockup-title">Onboarding Intent Screen</div>
+    <div class="mockup-sub">One screen, shown once at first launch. Asks the user what they're here for. Personalizes everything after.</div>
+
+    <div class="mockup-grid">
+
+      <!-- BEFORE -->
+      <div>
+        <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;text-align:center;margin-bottom:14px;">BEFORE · Current State</p>
+        <div class="phone-frame">
+          <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+          <div class="phone-screen">
+            <div class="before-screen">
+              <div class="before-header">Park+ — Everything for your car 🚗</div>
+              <div class="before-grid">
+                <div class="before-tile"><div class="t-icon">🛣️</div>FASTag</div>
+                <div class="before-tile"><div class="t-icon">📋</div>Challan</div>
+                <div class="before-tile"><div class="t-icon">🛡️</div>Insurance</div>
+                <div class="before-tile"><div class="t-icon">🅿️</div>Parking</div>
+              </div>
+              <div class="before-banner">🚗 Test Drive Offers Near You!</div>
+              <div class="before-item">💰 Personal Loan — up to ₹5L</div>
+              <div class="before-item">🔍 New Cars — 200+ Models</div>
+              <div class="before-item">📍 Find Parking Nearby</div>
+              <div class="before-item">📊 Vehicle Owner Lookup</div>
+              <div class="overwhelm-tag">😵 Where do I even start?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARROW -->
+      <div class="arrow-col">
+        <div class="arrow-line"></div>
+        <div class="arrow-icon">→</div>
+        <div class="arrow-line"></div>
+      </div>
+
+      <!-- AFTER -->
+      <div>
+        <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;text-align:center;margin-bottom:14px;">AFTER · Proposed</p>
+        <div class="phone-frame">
+          <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+          <div class="phone-screen">
+            <div class="after-screen">
+              <div class="after-header">
+                <div class="pp-logo-small">Park+</div>
+                <h4>What brings you<br>to Park+ today?</h4>
+                <p>We'll set up your experience around you</p>
+              </div>
+              <div class="intent-options">
+                <div class="intent-opt selected">
+                  <span class="opt-icon">🛣️</span> Manage FASTag & tolls
+                </div>
+                <div class="intent-opt">
+                  <span class="opt-icon">📋</span> Check / pay challans
+                </div>
+                <div class="intent-opt">
+                  <span class="opt-icon">🅿️</span> Find parking
+                </div>
+                <div class="intent-opt">
+                  <span class="opt-icon">🛡️</span> Car insurance
+                </div>
+                <div class="intent-opt">
+                  <span class="opt-icon">🚗</span> Explore new cars
+                </div>
+              </div>
+              <div class="after-cta">Set up my Park+ →</div>
+              <div class="good-tag">✓ Home screen personalizes to you</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--pp-border);">
+      <p style="font-size:13px;font-weight:700;color:var(--pp-gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px;">What changes after selection</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+        <div style="background:var(--pp-gray-light);border-radius:10px;padding:14px;">
+          <div style="font-size:12px;font-weight:700;color:var(--pp-blue);margin-bottom:6px;">HOME SCREEN</div>
+          <div style="font-size:13px;color:#444;">Reorders tiles to surface the selected use case first</div>
+        </div>
+        <div style="background:var(--pp-gray-light);border-radius:10px;padding:14px;">
+          <div style="font-size:12px;font-weight:700;color:var(--pp-blue);margin-bottom:6px;">PUSH NOTIFICATIONS</div>
+          <div style="font-size:13px;color:#444;">FASTag user gets toll reminders, not test drive ads</div>
+        </div>
+        <div style="background:var(--pp-gray-light);border-radius:10px;padding:14px;">
+          <div style="font-size:12px;font-weight:700;color:var(--pp-blue);margin-bottom:6px;">ONBOARDING TIPS</div>
+          <div style="font-size:13px;color:#444;">Only shows tooltips relevant to their chosen flow</div>
+        </div>
+        <div style="background:var(--pp-gray-light);border-radius:10px;padding:14px;">
+          <div style="font-size:12px;font-weight:700;color:var(--pp-blue);margin-bottom:6px;">DATA FOR PARK+</div>
+          <div style="font-size:13px;color:#444;">Intent signal at Day 0 — improves segmentation, upsell, and retention</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 4: PRD -->
+  <div class="section-label">
+    <div class="tag">04</div>
+    <h2>Product Requirements Document</h2>
+  </div>
+
+  <div class="prd-wrap">
+    <div class="prd-header">
+      <h3>PRD: Personalised Onboarding Intent Flow</h3>
+      <p>Feature Proposal · Park+ Consumer App · v1.0</p>
+    </div>
+    <div class="prd-meta">
+      <div class="prd-meta-item"><strong>Author:</strong> Vivek (PM Intern Candidate)</div>
+      <div class="prd-meta-item"><strong>Status:</strong> Proposal</div>
+      <div class="prd-meta-item"><strong>Priority:</strong> High</div>
+      <div class="prd-meta-item"><strong>Platform:</strong> Android & iOS</div>
+      <div class="prd-meta-item"><strong>Date:</strong> June 2026</div>
+    </div>
+    <div class="prd-body">
+
+      <div class="prd-section">
+        <div class="prd-section-title">1. Problem Statement</div>
+        <p>Park+ offers 6+ distinct use cases on its home screen (FASTag, challan, insurance, parking, car discovery, loans). A new user arriving for the first time has no clear entry point and no way to tell the app what they need. This leads to cognitive overload, low feature activation, and poor Day-1 retention.</p>
+        <p>The app currently treats every user identically at first launch. In a product where the FASTag user and the new-car-buyer have almost zero overlap in needs, this is a missed personalization opportunity at the most valuable moment — first impression.</p>
+      </div>
+
+      <div class="prd-section">
+        <div class="prd-section-title">2. Goals & Success Metrics</div>
+        <div class="metric-row">
+          <div class="metric-box">
+            <div class="m-label">Primary Goal</div>
+            <div class="m-val">+15%</div>
+            <div class="m-sub">Day-1 feature activation rate</div>
+          </div>
+          <div class="metric-box">
+            <div class="m-label">Secondary Goal</div>
+            <div class="m-val">+10%</div>
+            <div class="m-sub">Day-7 retention</div>
+          </div>
+          <div class="metric-box">
+            <div class="m-label">Data Goal</div>
+            <div class="m-val">70%</div>
+            <div class="m-sub">Intent completion rate on first launch</div>
+          </div>
+          <div class="metric-box">
+            <div class="m-label">Guardrail</div>
+            <div class="m-val">0%</div>
+            <div class="m-sub">Drop in other feature engagement (not to siloed)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prd-section">
+        <div class="prd-section-title">3. User Stories</div>
+        <div class="user-story">"As a new Park+ user who primarily needs FASTag, I want the app to understand this upfront so I don't have to hunt for the recharge button buried under car loan offers."</div>
+        <div class="user-story">"As a user who just got a challan, I want to open the app and immediately see how to check and pay it — not scroll past parking and test drive banners."</div>
+        <div class="user-story">"As a Park+ product team member, I want intent data at D0 so we can run better-segmented push campaigns and reduce uninstalls from irrelevant notifications."</div>
+      </div>
+
+      <div class="prd-section">
+        <div class="prd-section-title">4. Acceptance Criteria</div>
+        <ul class="ac-list">
+          <li>Intent screen is shown exactly once — on first app launch after install. Never shown again to returning users.</li>
+          <li>Screen displays 5 intent options: FASTag & Tolls, Challan Check & Payment, Car Insurance, Find Parking, Explore New Cars.</li>
+          <li>User can select one primary intent and proceed. Multi-select is a v2 consideration.</li>
+          <li>A "Skip / Explore everything" option is available (tapped users get default home screen, intent recorded as null).</li>
+          <li>Home screen tile order and default tab reorder based on selected intent within the same session.</li>
+          <li>Intent preference is stored in user profile — editable later under Settings → Personalize My Park+.</li>
+          <li>All other features remain accessible — intent only affects ranking, not visibility.</li>
+          <li>Intent selection event is logged to analytics with timestamp, device type, and selected option.</li>
+        </ul>
+      </div>
+
+      <div class="prd-section">
+        <div class="prd-section-title">5. Out of Scope (v1)</div>
+        <p>Multi-intent selection, ML-based intent inference from behavior, B2B/enterprise user differentiation, intent-based notification cadence changes (v2), and A/B testing framework setup (assumed existing).</p>
+      </div>
+
+      <div class="prd-section">
+        <div class="prd-section-title">6. Risks & Mitigations</div>
+        <div class="risk-row">
+          <div class="risk-box risk">
+            <div class="r-label">⚠ Risk</div>
+            <p>Users select an intent that doesn't match their actual recurring behavior, leading to a mis-personalized experience after day 1.</p>
+          </div>
+          <div class="risk-box mitigation">
+            <div class="r-label">✓ Mitigation</div>
+            <p>Allow intent reset under Settings. Also, monitor behavioral signals (what user actually taps) and allow home screen to adapt over time — intent is a starting point, not a cage.</p>
+          </div>
+          <div class="risk-box risk">
+            <div class="r-label">⚠ Risk</div>
+            <p>High skip rate — users dismiss the screen without selecting, reducing the data value of the feature.</p>
+          </div>
+          <div class="risk-box mitigation">
+            <div class="r-label">✓ Mitigation</div>
+            <p>Frame skip CTA as "I'll explore on my own" not just "Skip" — implies agency. Test copy variants. Track skip rate in analytics as a health metric.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="prd-section">
+        <div class="prd-section-title">7. Rollout Timeline</div>
+        <div class="timeline-row">
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-week">Week 1–2</div>
+              <div class="tl-title">Discovery & Wireframes</div>
+              <p>Finalize intent options with data team (what are the top 5 first actions of new users today?). Design wireframes. Align with eng on home screen reordering logic.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-week">Week 3–4</div>
+              <div class="tl-title">Build & Internal Testing</div>
+              <p>Engineering builds intent screen + reordering logic. QA on both platforms. Verify analytics events fire correctly.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-week">Week 5</div>
+              <div class="tl-title">A/B Launch (10% of new installs)</div>
+              <p>Run test group vs control. Monitor D1 activation, skip rate, intent completion. No full rollout until metrics validated.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div></div>
+            <div class="tl-content">
+              <div class="tl-week">Week 6–7</div>
+              <div class="tl-title">Full Rollout + Iteration</div>
+              <p>Roll out to 100% new installs if A/B shows positive signal. Document learnings for v2 (multi-intent, ML inference).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 5: GROWTH IDEA -->
+  <div class="section-label">
+    <div class="tag">05</div>
+    <h2>One growth idea</h2>
+  </div>
+
+  <div class="growth-card">
+    <div class="growth-eyebrow">Bonus Proposal</div>
+    <h3>Park+ EV Readiness Score</h3>
+    <p>Park+ already has FASTag data, location data, and is deploying EV charging infra. The next move: give every user a personalized "EV Readiness Score" based on their driving patterns. Show them how much they'd save switching to EV, which charging stations are near their regular routes, and partner with EV brands (Tata, MG, Ola Electric) for targeted test drives. Turns data Park+ already has into a new acquisition channel for both users and B2B clients.</p>
+    <div class="growth-tag-row">
+      <div class="growth-tag">FASTag data reuse</div>
+      <div class="growth-tag">EV infrastructure tie-in</div>
+      <div class="growth-tag">B2B lead gen for OEMs</div>
+      <div class="growth-tag">Zero new data needed</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ABOUT -->
+  <div class="section-label">
+    <div class="tag">06</div>
+    <h2>About me</h2>
+  </div>
+
+  <div class="about-card">
+    <div class="about-left">
+      <h3>Vivek</h3>
+      <p>Recent B.Tech graduate in Electronics & Communication Engineering from NIT Kurukshetra. Building toward a career in product and AI/software engineering. I made this teardown because I think Park+ has a genuinely interesting product problem worth solving — and I wanted to show, not just tell.</p>
+      <div class="about-skills">
+        <div class="about-skill">Product Thinking</div>
+        <div class="about-skill">SQL & Data Analysis</div>
+        <div class="about-skill">MySQL · Tableau</div>
+        <div class="about-skill">Python (learning)</div>
+        <div class="about-skill">User Research</div>
+        <div class="about-skill">NIT Kurukshetra · ECE · 2025</div>
+      </div>
+    </div>
+    <div class="about-right">
+      <div class="about-avatar">V</div>
+      <p>PM Intern Candidate</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  Built as part of a <strong>Park+ PM Internship Application</strong> · Vivek · NIT Kurukshetra · June 2026<br>
+  <span style="margin-top:6px;display:inline-block;">This is an independent product analysis — not affiliated with Park+</span>
+</footer>
+
+</body>
+</html>
